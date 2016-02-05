@@ -56,9 +56,9 @@
                 graph.addLink(e.data().source, e.data().target);
             });
 
-            var L = that.l(graph);
+            var L = that.l(graph,options);
 
-            for (var i = 0; i < ITERATIONS_COUNT; ++i) {
+            for (var i = 0; i < options.iterations; ++i) {
                 L.step();
             }
 
