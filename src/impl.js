@@ -39,11 +39,11 @@
         Layout.prototype.g = Graph;
 
         Layout.prototype.run = function(){
-
+            var layout = this;
             layout.trigger({ type: 'layoutstart', layout: layout });
 
             var ITERATIONS_COUNT = 200;
-            var layout = this;
+
             var options = this.options;
             var that = this;
             var graph = that.g();
@@ -71,6 +71,7 @@
                 });
 
             layout.trigger({ type: 'layoutstop', layout: layout });
+            layout.trigger({ type: 'layoutready', layout: layout });
 
 
         /*    _.each(edges,function(e,k){
