@@ -39,6 +39,9 @@
         Layout.prototype.g = Graph;
 
         Layout.prototype.run = function(){
+
+            layout.trigger({ type: 'layoutstart', layout: layout });
+
             var ITERATIONS_COUNT = 200;
             var layout = this;
             var options = this.options;
@@ -62,11 +65,13 @@
                 L.step();
             }
 
-            setTimeout(function(){
+
                 nodes.layoutPositions(layout,options,function(i,e){
                     return L.getNodePosition(e.data().id)
                 });
-            })
+
+            layout.trigger({ type: 'layoutstop', layout: layout });
+
 
         /*    _.each(edges,function(e,k){
                 graph.addLink(e.data().source, e.data().target);
