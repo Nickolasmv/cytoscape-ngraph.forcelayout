@@ -53,7 +53,7 @@ gulp.task('confver', ['version'], function(){
 
 gulp.task('version', function( next ){
   var now = new Date();
-  version = process.env['VERSION'];
+  version = '1.0.0'//process.env['VERSION'];
 
   if( version ){
     done();
