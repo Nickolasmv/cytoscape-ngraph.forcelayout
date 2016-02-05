@@ -10,7 +10,7 @@
         if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
         var defaults = {
-            springLength: 30,
+            springLength: 600,
             springCoeff: 0.0008,
             gravity: -1.2,
             theta: 0.8,
@@ -58,13 +58,15 @@
 
             var L = that.l(graph,options);
 
-            for (var i = 0; i < options.iterations; ++i) {
+            for (var i = 0; i < (options.iterations || 5); ++i) {
                 L.step();
             }
 
-            nodes.layoutPositions(layout,options,function(i,e){
-                return L.getNodePosition(e.data().id)
-            });
+            setTimeout(function(){
+                nodes.layoutPositions(layout,options,function(i,e){
+                    return L.getNodePosition(e.data().id)
+                });
+            })
 
         /*    _.each(edges,function(e,k){
                 graph.addLink(e.data().source, e.data().target);
