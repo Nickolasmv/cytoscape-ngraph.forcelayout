@@ -34,6 +34,7 @@
   "dependencies": {
     "browserify": "^13.0.0",
     "gulp-derequire": "^2.1.0",
+    "gulp-shell": "^0.2.11",
     "ngraph.forcelayout": "0.0.22",
     "ngraph.graph": "0.0.12",
     "node-notifier": "^4.4.0",
