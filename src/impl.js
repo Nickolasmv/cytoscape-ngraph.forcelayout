@@ -20,7 +20,7 @@ var ngraph = function (cytoscape) {
         dragCoeff: 0.02,
         timeStep: 30,
         iterations: 100,
-        refreshInterval: 16, // in ms
+        refreshInterval: 5, // in ms
         refreshIterations: 10, // iterations until thread sends an update
         fit: true
     };
@@ -84,7 +84,7 @@ var ngraph = function (cytoscape) {
         };
 
         graph.on('changed', function (e) {
-            console.dir(e);
+          //  console.dir(e);
         });
 
         _.each(nodes, function (e, k) {
@@ -97,7 +97,12 @@ var ngraph = function (cytoscape) {
 
         var L = that.l(graph, options);
 
-        var left = (options.iterations || 200);
+        var left = options.iterations ;
+
+        L.on('stable',function(){
+            console.dir('got Stable event');
+            left = options.iterations ;
+        });
         // for (var i = 0; i < (options.iterations || 500); ++i) {
 
         if (!options.animate) {
@@ -109,13 +114,13 @@ var ngraph = function (cytoscape) {
             if (left != 0  /*condition for stopping layout*/) {
 
                 if (options.animate) {
-                    if (!updateTimeout) {
+                    L.step();
+                    left--;
+                    step();
+                    if (!updateTimeout || left == 0) {
                         updateTimeout = setTimeout(function () {
-                            L.step();
-                            left--;
                             update();
                             updateTimeout = null;
-                            step();
                         }, options.refreshInterval);
                     }
                 } else{
