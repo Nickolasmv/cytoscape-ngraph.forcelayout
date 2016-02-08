@@ -55,6 +55,8 @@ var ngraph = function (cytoscape) {
         var cy = options.cy;
         var eles = options.eles;
         var nodes = eles.nodes();
+        var parents = nodes.parents();
+        nodes = nodes.difference(parents);
         var edges = eles.edges();
         var firstUpdate = true;
 
