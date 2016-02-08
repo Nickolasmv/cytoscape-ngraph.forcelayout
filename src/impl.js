@@ -13,10 +13,10 @@ var ngraph = function (cytoscape) {
 
     var defaults = {
         springLength: 300,
-        springCoeff: 0.00008,
+        springCoeff: 0.0008,
         gravity: -1.2,
-        theta: 0.08,
-        animate: true,
+        theta: 0.8,
+        animate: false,
         dragCoeff: 0.02,
         timeStep: 30,
         iterations: 100,
@@ -58,11 +58,13 @@ var ngraph = function (cytoscape) {
         var parents = nodes.parents();
         nodes = nodes.difference(parents);
         var edges = eles.edges();
+
+        var edgesHash={};
         var firstUpdate = true;
 
-        if (eles.length > 3000) {
+/*        if (eles.length > 3000) {
             options.iterations = options.iterations - Math.abs(options.iterations / 3); // reduce iterations for big graph
-        }
+        }*/
 
         var update = function () {
             cy.batch(function () {
@@ -92,7 +94,10 @@ var ngraph = function (cytoscape) {
         });
 
         _.each(edges, function (e, k) {
-            graph.addLink(e.data().source, e.data().target);
+            if(!edgesHash[e.data().source+':'+e.data().target] && !edgesHash[e.data().target+':'+e.data().source]){
+                edgesHash[e.data().source + ':' + e.data().target] = e;
+                graph.addLink(e.data().source, e.data().target);
+            }
         });
 
         var L = that.l(graph, options);
@@ -110,31 +115,32 @@ var ngraph = function (cytoscape) {
         }
         var updateTimeout;
 
-        var step = function () {
-            if (left != 0  /*condition for stopping layout*/) {
 
-                if (options.animate) {
-                    L.step();
-                    left--;
-                    step();
+        var step = function () {
+            if (options.animate) {
+                if (left != 0  /*condition for stopping layout*/) {
                     if (!updateTimeout || left == 0) {
                         updateTimeout = setTimeout(function () {
+                            L.step();
+                            left--;
                             update();
                             updateTimeout = null;
+                            step();
                         }, options.refreshInterval);
                     }
-                } else{
-                    L.step();
-                    left--;
-                    step();
-                }
 
-            } else {
-                if (!options.animate) {
-                    update();
+                } else {
+                    layout.trigger({type: 'layoutstop', layout: layout});
+                    layout.trigger({type: 'layoutready', layout: layout});
                 }
-                layout.trigger({type: 'layoutstop', layout: layout});
-                layout.trigger({type: 'layoutready', layout: layout});
+            }else{
+                for (var i = 0; i < left; ++i) {
+                    if(i==Math.abs(left/2)){
+                        console.log('Half done!');
+                    }
+                    L.step();
+                }
+                update();
             }
         };
         step();
