@@ -2,7 +2,7 @@
 
 var Graph = require('ngraph.graph');
 var _ = require('underscore');
-var Nlayout = require('ngraph.forcelayout');
+var Nlayout = require('ngraph.forcelayout.v2');
 var Thread;
 // registers the extension on a cytoscape lib ref
 var ngraph = function (cytoscape) {
@@ -16,9 +16,10 @@ var ngraph = function (cytoscape) {
         springCoeff: 0.0008,
         gravity: -1.2,
         theta: 0.8,
-        animate: false,
+        animate: true,
         dragCoeff: 0.02,
         timeStep: 30,
+        stableThreshold: 0.09,
         iterations: 100,
         refreshInterval: 5, // in ms
         refreshIterations: 10, // iterations until thread sends an update
@@ -105,7 +106,7 @@ var ngraph = function (cytoscape) {
         var left = options.iterations ;
 
         L.on('stable',function(){
-            console.dir('got Stable event');
+            console.log('got Stable event');
             left = options.iterations ;
         });
         // for (var i = 0; i < (options.iterations || 500); ++i) {
@@ -125,10 +126,9 @@ var ngraph = function (cytoscape) {
                             left--;
                             update();
                             updateTimeout = null;
-                            step();
+                            step(left==0);
                         }, options.refreshInterval);
                     }
-
                 } else {
                     layout.trigger({type: 'layoutstop', layout: layout});
                     layout.trigger({type: 'layoutready', layout: layout});
@@ -138,7 +138,7 @@ var ngraph = function (cytoscape) {
                     if(i==Math.abs(left/2)){
                         console.log('Half done!');
                     }
-                    L.step();
+                    L.step(true);
                 }
                 update();
             }
