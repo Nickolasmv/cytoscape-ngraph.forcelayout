@@ -59,20 +59,26 @@ var ngraph = function (cytoscape) {
         var parents = nodes.parents();
         nodes = nodes.difference(parents);
         var edges = eles.edges();
+        var edgesHash = {};
 
-        var edgesHash={};
+       
         var firstUpdate = true;
 
 /*        if (eles.length > 3000) {
             options.iterations = options.iterations - Math.abs(options.iterations / 3); // reduce iterations for big graph
         }*/
 
-        var update = function () {
-            cy.batch(function () {
-                nodes.positions(function (i, node) {
-                    return L.getNodePosition(node.id())
-                });
+        var update = function (nodesJson) {
+           /* cy.batch(function () {
+                nodesJson.forEach(function(e,k){
+                    nodes.$('#'+ e.data.id).position(e.position);
+                })
+
+            });*/
+            nodes.positions(function (i, node) {
+                return L.getNodePosition(node.id())
             });
+
             // maybe we fit each iteration
             if (options.fit) {
                 cy.fit(options.padding);
@@ -109,6 +115,14 @@ var ngraph = function (cytoscape) {
             console.log('got Stable event');
             left = options.iterations ;
         });
+
+
+        var left = options.iterations ;
+
+        L.on('stable',function(){
+            console.log('got Stable event');
+            left = options.iterations ;
+        });
         // for (var i = 0; i < (options.iterations || 500); ++i) {
 
         if (!options.animate) {
@@ -122,11 +136,12 @@ var ngraph = function (cytoscape) {
                 if (left != 0  /*condition for stopping layout*/) {
                     if (!updateTimeout || left == 0) {
                         updateTimeout = setTimeout(function () {
-                            L.step();
                             left--;
-                            update();
+                            L.step(left==0);
+                            calcAndSend(  );
+                            //update();
                             updateTimeout = null;
-                            step(left==0);
+                            step();
                         }, options.refreshInterval);
                     }
                 } else {
@@ -138,35 +153,22 @@ var ngraph = function (cytoscape) {
                     if(i==Math.abs(left/2)){
                         console.log('Half done!');
                     }
+                    calcAndSend();
                     L.step(true);
                 }
                 update();
             }
         };
         step();
-        //}
 
+        function calcAndSend(){
+            update();
+           /* nodeJsons.forEach(function( nodeJson, j ){
+                nodeJson.position = L.getNodePosition(node.data.id)
+            });
+            broadcast( nodeJsons );*/
+        }
 
-        /*  nodes.layoutPositions(layout,options,function(i,e){
-         return L.getNodePosition(e.data().id)
-         });*/
-
-
-        /*    _.each(edges,function(e,k){
-         graph.addLink(e.data().source, e.data().target);
-         });
-
-         graph.forEachNode(function(node) {
-         eles.nodes('#'+node.id() || node.id).position(L.getNodePosition(node.id));
-         });*/
-
-
-        /*          var getRandomPos = function( i, ele ){
-         return {
-         x: Math.round( Math.random() * 100 ),
-         y: Math.round( Math.random() * 100 )
-         };
-         };*/
 
         // dicrete/synchronous layouts can just use this helper and all the
         // busywork is handled for you, including std opts:
@@ -183,19 +185,19 @@ var ngraph = function (cytoscape) {
         // (this example uses a thread, but you could use a fabric to get even
         // better performance if your algorithm allows for it)
 
-        /*    var thread = this.thread = cytoscape.thread();
-         thread.require( getRandomPos, 'getRandomPos' );
+      /*      var thread = this.thread = cytoscape.thread();
+         thread.require(L);
 
          // to indicate we've started
          layout.trigger('layoutstart');
 
          // for thread updates
-         var firstUpdate = true;
-         var id2pos = {};
-         var updateTimeout;
+        // var firstUpdate = true;
+        // var id2pos = {};
+        // var updateTimeout;
 
          // update node positions
-         var update = function(){
+      /!*   var update = function(){
          nodes.positions(function( i, node ){
          return id2pos[ node.id() ];
          });
@@ -210,20 +212,13 @@ var ngraph = function (cytoscape) {
          layout.trigger('layoutready');
          firstUpdate = false;
          }
-         };
+         };*!/
 
          // update the node positions when notified from the thread but
          // rate limit it a bit (don't want to overwhelm the main/ui thread)
          thread.on('message', function( e ){
          var nodeJsons = e.message;
-         nodeJsons.forEach(function( n ){ id2pos[n.data.id] = n.position; });
-
-         if( !updateTimeout ){
-         updateTimeout = setTimeout( function(){
-         update();
-         updateTimeout = null;
-         }, options.refreshInterval );
-         }
+         update(nodeJsons);
          });
 
          // we want to keep the json sent to threads slim and fast
@@ -245,26 +240,70 @@ var ngraph = function (cytoscape) {
          // data to pass to thread
          var pass = {
          eles: eles.map( eleAsJson ),
-         refreshIterations: options.refreshIterations
+         refreshInterval:  options.refreshInterval
          // maybe some more options that matter to the calculations here ...
          };
 
          // then we calculate for a while to get the final positions
-         thread.pass( pass ).run(function( pass ){
-         var getRandomPos = _ref_('getRandomPos');
+         thread.pass( pass ).run(function( pass ){;
          var broadcast = _ref_('broadcast');
          var nodeJsons = pass.eles.filter(function(e){ return e.group === 'nodes'; });
 
-         // calculate for a while (you might use the edges here)
-         for( var i = 0; i < 100000; i++ ){
-         nodeJsons.forEach(function( nodeJson, j ){
-         nodeJson.position = getRandomPos( j, nodeJson );
-         });
 
-         if( i % pass.refreshIterations === 0 ){ // cheaper to not broadcast all the time
-         broadcast( nodeJsons ); // send new positions outside the thread
-         }
-         }
+
+             var left = options.iterations ;
+
+             L.on('stable',function(){
+                 console.log('got Stable event');
+                 left = options.iterations ;
+             });
+             // for (var i = 0; i < (options.iterations || 500); ++i) {
+
+             if (!options.animate) {
+                 options.refreshInterval = 0;
+             }
+             var updateTimeout;
+
+
+             var step = function () {
+                 if (options.animate) {
+                     if (left != 0  /!*condition for stopping layout*!/) {
+                         if (!updateTimeout || left == 0) {
+                             updateTimeout = setTimeout(function () {
+                                 left--;
+                                 L.step(left==0);
+                                 calcAndSend(  );
+                                 //update();
+                                 updateTimeout = null;
+                                 step();
+                             }, options.refreshInterval);
+                         }
+                     } else {
+                         layout.trigger({type: 'layoutstop', layout: layout});
+                         layout.trigger({type: 'layoutready', layout: layout});
+                     }
+                 }else{
+                     for (var i = 0; i < left; ++i) {
+                         if(i==Math.abs(left/2)){
+                             console.log('Half done!');
+                         }
+                         calcAndSend();
+                         L.step(true);
+                     }
+                     update();
+                 }
+             };
+             step();
+
+             function calcAndSend(){
+                 nodeJsons.forEach(function( nodeJson, j ){
+                     nodeJson.position = L.getNodePosition(node.data.id)
+                 });
+                 broadcast( nodeJsons );
+             }
+
+
+
          }).then(function(){
          // to indicate we've finished
          layout.trigger('layoutstop');
