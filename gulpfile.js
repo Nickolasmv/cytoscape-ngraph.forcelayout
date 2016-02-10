@@ -53,7 +53,7 @@ gulp.task('confver', ['version'], function(){
 
 gulp.task('version', function( next ){
   var now = new Date();
-  version = '1.1.8'//process.env['VERSION'];
+  version = '1.1.9'//process.env['VERSION'];
 
   if( version ){
     done();
@@ -86,13 +86,13 @@ gulp.task('pkgver', ['version'], function(){
 
 gulp.task('push', shell.task([
   'git add -A',
-  'git commit -m "pushing changes for v 1.1.8 release" || echo Nothing to commit',
+  'git commit -m "pushing changes for v 1.1.9 release" || echo Nothing to commit',
   'git push || echo Nothing to push'
 ]));
 
 gulp.task('tag', shell.task([
-  'git tag -a 1.1.8 -m "tagging v1.1.8"',
-  'git push origin 1.1.8'
+  'git tag -a 1.1.9 -m "tagging v1.1.9"',
+  'git push origin 1.1.9'
 ]));
 
 gulp.task('npm', shell.task([

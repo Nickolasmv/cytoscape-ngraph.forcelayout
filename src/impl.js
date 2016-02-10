@@ -13,16 +13,16 @@ var ngraph = function (cytoscape) {
     } // can't register if cytoscape unspecified
 
     var defaults = {
-        springLength: 300,
-        springCoeff: 0.0008,
+        springLength: 100,
+        springCoeff: 0.00008,
         gravity: -1.2,
-        theta: 0.8,
-        animate: false,
-        dragCoeff: 0.02,
+        theta: 0.08,
+        animate: true,
+        dragCoeff: 0.002,
         timeStep: 30,
         stableThreshold: 0.09,
         iterations: 100,
-        refreshInterval: 1, // in ms
+        refreshInterval: 16, // in ms
         refreshIterations: 10, // iterations until thread sends an update
         fit: true
     };
@@ -143,7 +143,10 @@ var ngraph = function (cytoscape) {
                             L.step(left == 0).then(function () {
                                 calcAndSend();
                                 step();
+                            }).catch(function(err){
+                                console.log(err);
                             });
+                            step();
                         }, options.refreshInterval);
                     }
                 } else {
@@ -151,7 +154,6 @@ var ngraph = function (cytoscape) {
                     layout.trigger({type: 'layoutready', layout: layout});
                 }
             } else {
-                var pr = [];
 
                 var rep = function () {
                     L.step(left == 1).then(function () {
@@ -160,7 +162,9 @@ var ngraph = function (cytoscape) {
                         else {
                             update();
                         }
-                    })
+                    }).catch(function(err){
+                        console.log(err);
+                    });
                 };
                 rep();
             }
