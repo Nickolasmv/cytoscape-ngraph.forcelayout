@@ -13,16 +13,16 @@ var ngraph = function (cytoscape) {
     } // can't register if cytoscape unspecified
 
     var defaults = {
-        springLength: 100,
+        springLength: 300,
         springCoeff: 0.00008,
         gravity: -1.2,
         theta: 0.08,
         animate: true,
         dragCoeff: 0.002,
-        timeStep: 30,
+        timeStep: 10,
         stableThreshold: 0.09,
-        iterations: 100,
-        refreshInterval: 16, // in ms
+        iterations: 500,
+        refreshInterval: 1, // in ms
         refreshIterations: 10, // iterations until thread sends an update
         fit: true
     };
@@ -146,7 +146,7 @@ var ngraph = function (cytoscape) {
                             }).catch(function(err){
                                 console.log(err);
                             });
-                            step();
+                            //step();
                         }, options.refreshInterval);
                     }
                 } else {

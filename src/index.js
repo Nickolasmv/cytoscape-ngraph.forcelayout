@@ -6,7 +6,6 @@
     var getLayout = require('./impl.js');
     var register = function( cytoscape ){
         var Layout = getLayout( cytoscape );
-
         cytoscape('layout', 'cytoscape-ngraph.forcelayout', Layout);
     };
 
