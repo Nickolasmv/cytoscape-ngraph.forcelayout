@@ -13,16 +13,16 @@ var ngraph = function (cytoscape) {
     } // can't register if cytoscape unspecified
 
     var defaults = {
-        springLength: 300,
+        springLength: 100,
         springCoeff: 0.00008,
         gravity: -1.2,
         theta: 0.08,
-        animate: true,
+        animate: false,
         dragCoeff: 0.002,
-        timeStep: 10,
+        timeStep: 30,
         stableThreshold: 0.09,
-        iterations: 500,
-        refreshInterval: 1, // in ms
+        iterations: 100,
+        refreshInterval: 16, // in ms
         refreshIterations: 10, // iterations until thread sends an update
         fit: true
     };
@@ -110,6 +110,19 @@ var ngraph = function (cytoscape) {
 
         var L = that.l(graph, options);
 
+        _.each(nodes,function(e,k){
+            var data =e.data();
+            var pos = data.position();
+            if(data.pin){
+                L.pinNode(data.id,true);
+            } else{
+                L.pinNode(data.id,false);
+            }
+            if(pos.x && pos.y){
+                L.setNodePosition(data.id,pos);
+            }
+        });
+
         var left = options.iterations;
 
         L.on('stable', function () {
@@ -140,12 +153,9 @@ var ngraph = function (cytoscape) {
                             left--;
                             //update();
                             updateTimeout = null;
-                            L.step(left == 0).then(function () {
-                                calcAndSend();
-                                step();
-                            }).catch(function(err){
-                                console.log(err);
-                            });
+                            L.step()
+                            update();
+                            step();
                             //step();
                         }, options.refreshInterval);
                     }
@@ -155,18 +165,10 @@ var ngraph = function (cytoscape) {
                 }
             } else {
 
-                var rep = function () {
-                    L.step(left == 1).then(function () {
-                        if (left--)
-                            rep();
-                        else {
-                            update();
-                        }
-                    }).catch(function(err){
-                        console.log(err);
-                    });
+                for (var i = 0; i < options.iterations ; i++){
+                     L.step()
                 };
-                rep();
+                update();
             }
 
             };

@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-ngraph.forcelayout",
-  "version": "1.1.10",
+  "version": "1.2.0",
   "description": "ngraph.forcelayout",
   "main": "cytoscape-ngraph.forcelayout.js",
   "spm": {
@@ -36,9 +36,8 @@
     "gulp-derequire": "^2.1.0",
     "gulp-shell": "^0.2.11",
     "ngraph.events": "0.0.3",
-    "ngraph.forcelayout.v2": "0.0.25",
+    "ngraph.forcelayout.v2": "0.0.26",
     "ngraph.graph": "0.0.12",
-    "ngraph.physics.simulator.v2": "file:///C:\\Users\\nikolay.svystun\\Documents\\ngraph.physics.simulator.v2",
     "node-notifier": "^4.4.0",
     "q": "^1.4.1",
     "underscore": "^1.8.3",
