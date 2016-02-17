@@ -58,7 +58,15 @@ var ngraph = function (cytoscape) {
             var eles = options.eles;
             var nodes = eles.nodes();
             var parents = nodes.parents();
+
+            // FILTER
+
             nodes = nodes.difference(parents);
+
+            nodes = nodes.filterFn(function( ele ){
+                return ele.connectedEdges().length>0
+            });
+
             var edges = eles.edges();
             var edgesHash = {};
 
@@ -112,21 +120,25 @@ var ngraph = function (cytoscape) {
 
             _.each(nodes, function (e, k) {
                 var data = e.data();
-                var pos = e.position();
+                //var pos = e.position();
                 if (data.pin) {
                     L.pinNode(data.id, true);
-                    e.removeData('pin')
-
+                    e.removeData('pin');
+                    e.data('unpin',true);
                 } else if(data.unpin) {
                     L.pinNode(data.id, false);
-                    e.removeData('unpin')
+                    e.removeData('unpin');
                 }
-                if (pos.x && pos.y) {
-                    L.setNodePosition(data.id, pos);
-                }
+                //if (pos.x && pos.y) {
+                //  L.setNodePosition(data.id, pos);
+                //}
             });
 
             var left = options.iterations;
+
+                this.on('layoutstop',function(){
+                    options.iterations = 0;
+                });
 
             L.on('stable', function () {
                 console.log('got Stable event');
@@ -332,6 +344,7 @@ var ngraph = function (cytoscape) {
         Layout.prototype.stop = function () {
             // continuous/asynchronous layout may want to set a flag etc to let
             // run() know to stop
+
 
             if (this.thread) {
                 this.thread.stop();
