@@ -183,7 +183,8 @@ var ngraph = function (cytoscape) {
                     for (var i = 0; i < options.iterations; i++) {
                         L.step()
                     }
-                    ;
+                    layout.trigger({type: 'layoutstop', layout: layout});
+                    layout.trigger({type: 'layoutready', layout: layout});
                     update();
                 }
 
