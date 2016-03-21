@@ -17,7 +17,7 @@ var ngraph = function (cytoscape) {
             springCoeff: 0.00008,
             gravity: -5,
             theta: 0.001,
-            animate: true,
+            animate: false,
             dragCoeff: 0.01,
             timeStep: 90,
             stableThreshold: 2,
