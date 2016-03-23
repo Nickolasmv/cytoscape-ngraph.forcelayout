@@ -13,7 +13,16 @@ var ngraph = function (cytoscape) {
             return;
         } // can't register if cytoscape unspecified
 
-        var defaults = {physics :{
+        var defaults = {
+            async: {
+                // tell layout that we want to compute all at once:
+                maxIterations: 1000,
+                stepsPerCycle: 30,
+
+                // Run it till the end:
+                waitForStep: false
+            },
+            physics :{
             /**
              * Ideal length for links (springs in physical model).
              */
@@ -54,7 +63,7 @@ var ngraph = function (cytoscape) {
             /**
              * Maximum movement of the system which can be considered as stabilized
              */
-            stableThreshold: 0.009
+            stableThreshold: 0.000009
             /*springLength: 100,
             springCoeff: 0.00008,
             gravity: -1,
@@ -141,6 +150,11 @@ var ngraph = function (cytoscape) {
                     return L.getNodePosition(node.id())
                 });
 
+                if(layoutOptions.async){
+                    layout.trigger({type: 'layoutstop', layout: layout});
+                    layout.trigger({type: 'layoutready', layout: layout});
+                }
+
                /* nodes.forEach(function (node) {
                     L.getNodePosition(node.id())
                 });*/
@@ -224,7 +238,13 @@ var ngraph = function (cytoscape) {
                 layoutOptions.refreshInterval = 0;
             }
             var updateTimeout;
+            L.on('cycle', function() {
+                update();
+            });
 
+            if(layoutOptions.async){
+                return this;
+            }
 
             var step = function () {
                 if (layoutOptions.animate) {
@@ -235,7 +255,7 @@ var ngraph = function (cytoscape) {
                                 //update();
                                 updateTimeout = null;
                                 L.step() ?  left =0:false;
-                                update();
+                               // update();
                                 step();
                                 //step();
                             }, layoutOptions.refreshInterval);
@@ -247,11 +267,11 @@ var ngraph = function (cytoscape) {
                 } else {
 
                     for (var i = 0; i < layoutOptions.iterations; i++) {
-                        L.step() ? i = layoutOptions.iterations:false
+                        L.step()
                     }
                     layout.trigger({type: 'layoutstop', layout: layout});
                     layout.trigger({type: 'layoutready', layout: layout});
-                    update();
+                    //update();
                 }
 
             };
