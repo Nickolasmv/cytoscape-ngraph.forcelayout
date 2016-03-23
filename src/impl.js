@@ -3,7 +3,8 @@
 var Graph = require('ngraph.graph');
 var _ = require('underscore');
 var Q = require('Q');
-var Nlayout = require('ngraph.forcelayout.v2');
+//var Nlayout = require('ngraph.forcelayout.v2');
+var Nlayout = require('ngraph.asyncforce');
 var Thread;
 // registers the extension on a cytoscape lib ref
 var ngraph = function (cytoscape) {
@@ -12,18 +13,66 @@ var ngraph = function (cytoscape) {
             return;
         } // can't register if cytoscape unspecified
 
-        var defaults = {
+        var defaults = {physics :{
+            /**
+             * Ideal length for links (springs in physical model).
+             */
             springLength: 100,
+
+            /**
+             * Hook's law coefficient. 1 - solid spring.
+             */
+            springCoeff: 0.0008,
+
+            /**
+             * Coulomb's law coefficient. It's used to repel nodes thus should be negative
+             * if you make it positive nodes start attract each other :).
+             */
+            gravity: -1.2,
+
+            /**
+             * Theta coefficient from Barnes Hut simulation. Ranged between (0, 1).
+             * The closer it's to 1 the more nodes algorithm will have to go through.
+             * Setting it to one makes Barnes Hut simulation no different from
+             * brute-force forces calculation (each node is considered).
+             */
+            theta: 0.8,
+
+            /**
+             * Drag force coefficient. Used to slow down system, thus should be less than 1.
+             * The closer it is to 0 the less tight system will be.
+             */
+            dragCoeff: 0.02,
+
+            /**
+             * Default time step (dt) for forces integration
+             */
+            timeStep : 20,
+            iterations: 10000,
+            fit: true,
+
+            /**
+             * Maximum movement of the system which can be considered as stabilized
+             */
+            stableThreshold: 0.009
+            /*springLength: 100,
             springCoeff: 0.00008,
-            gravity: -5,
+            gravity: -1,
             theta: 0.001,
-            animate: false,
+            animate: true,
             dragCoeff: 0.01,
             timeStep: 90,
             stableThreshold: 2,
-            iterations: 100,
+            iterations: 10000,
             refreshInterval: 16, // in ms
             refreshIterations: 10, // iterations until thread sends an update
+            fit: true*/
+        },
+            iterations: 10000,
+            refreshInterval: 16, // in ms
+            refreshIterations: 10, // iterations until thread sends an update
+            stableThreshold: 2,
+            animate: true,
             fit: true
         };
 
@@ -41,6 +90,9 @@ var ngraph = function (cytoscape) {
 
         function Layout(options) {
             this.options = extend({}, defaults, options);
+            this.layoutOptions = extend({}, defaults, options);
+            delete  this.layoutOptions.cy;
+            delete  this.layoutOptions.eles;
         }
 
         Layout.prototype.l = Nlayout;
@@ -49,9 +101,8 @@ var ngraph = function (cytoscape) {
         Layout.prototype.run = function () {
             var layout = this;
             layout.trigger({type: 'layoutstart', layout: layout});
-
-
             var options = this.options;
+            var layoutOptions = this.layoutOptions;
             var that = this;
             var graph = that.g();
             var cy = options.cy;
@@ -69,6 +120,7 @@ var ngraph = function (cytoscape) {
 
             var edges = eles.edges();
             var edgesHash = {};
+            var L;
 
 
             var firstUpdate = true;
@@ -85,12 +137,17 @@ var ngraph = function (cytoscape) {
 
                  });*/
                 nodes.positions(function (i, node) {
+                    if(!node.data('dragging'))
                     return L.getNodePosition(node.id())
                 });
 
+               /* nodes.forEach(function (node) {
+                    L.getNodePosition(node.id())
+                });*/
+
                 // maybe we fit each iteration
-                if (options.fit) {
-                    cy.fit(options.padding);
+                if (layoutOptions.fit) {
+                    cy.fit(layoutOptions.padding);
                 }
 
                 if (firstUpdate) {
@@ -106,7 +163,16 @@ var ngraph = function (cytoscape) {
             });
 
             _.each(nodes, function (e, k) {
-                graph.addNode(e.id)
+                e.on('tapstart',function(e){
+                 e.cyTarget.data('dragging',true)
+                });  e.on('tapend',function(e){
+                    e.cyTarget.removeData('dragging');
+                });  e.on('position','node[dragging]',function(e){
+                   if(L.setNodePosition && e.cyTarget.data('dragging')) {
+                       L.setNodePosition(e.cyTarget.data().id);
+                   }
+                });
+                graph.addNode(e.data().id);
             });
 
             _.each(edges, function (e, k) {
@@ -116,7 +182,7 @@ var ngraph = function (cytoscape) {
                 }
             });
 
-            var L = that.l(graph, options);
+          L = that.l(graph, layoutOptions);
 
             _.each(nodes, function (e, k) {
                 var data = e.data();
@@ -134,19 +200,19 @@ var ngraph = function (cytoscape) {
                 //}
             });
 
-            var left = options.iterations;
+            var left = layoutOptions.iterations;
 
                 this.on('layoutstop',function(){
-                    options.iterations = 0;
+                    layoutOptions.iterations = 0;
                 });
 
             L.on('stable', function () {
                 console.log('got Stable event');
-                left = options.iterations;
+                left = layoutOptions.iterations;
             });
 
 
-            var left = options.iterations;
+            var left = layoutOptions.iterations;
 
             L.on('stable', function () {
                 console.log('got Stable event');
@@ -154,25 +220,25 @@ var ngraph = function (cytoscape) {
             });
             // for (var i = 0; i < (options.iterations || 500); ++i) {
 
-            if (!options.animate) {
-                options.refreshInterval = 0;
+            if (!layoutOptions.animate) {
+                layoutOptions.refreshInterval = 0;
             }
             var updateTimeout;
 
 
             var step = function () {
-                if (options.animate) {
+                if (layoutOptions.animate) {
                     if (left != 0  /*condition for stopping layout*/) {
                         if (!updateTimeout || left == 0) {
                             updateTimeout = setTimeout(function () {
                                 left--;
                                 //update();
                                 updateTimeout = null;
-                                L.step();
+                                L.step() ?  left =0:false;
                                 update();
                                 step();
                                 //step();
-                            }, options.refreshInterval);
+                            }, layoutOptions.refreshInterval);
                         }
                     } else {
                         layout.trigger({type: 'layoutstop', layout: layout});
@@ -180,8 +246,8 @@ var ngraph = function (cytoscape) {
                     }
                 } else {
 
-                    for (var i = 0; i < options.iterations; i++) {
-                        L.step()
+                    for (var i = 0; i < layoutOptions.iterations; i++) {
+                        L.step() ? i = layoutOptions.iterations:false
                     }
                     layout.trigger({type: 'layoutstop', layout: layout});
                     layout.trigger({type: 'layoutready', layout: layout});
