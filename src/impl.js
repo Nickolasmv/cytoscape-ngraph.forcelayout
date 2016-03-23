@@ -22,61 +22,61 @@ var ngraph = function (cytoscape) {
                 // Run it till the end:
                 waitForStep: false
             },
-            physics :{
-            /**
-             * Ideal length for links (springs in physical model).
-             */
-            springLength: 100,
+            physics: {
+                /**
+                 * Ideal length for links (springs in physical model).
+                 */
+                springLength: 100,
 
-            /**
-             * Hook's law coefficient. 1 - solid spring.
-             */
-            springCoeff: 0.0008,
+                /**
+                 * Hook's law coefficient. 1 - solid spring.
+                 */
+                springCoeff: 0.0008,
 
-            /**
-             * Coulomb's law coefficient. It's used to repel nodes thus should be negative
-             * if you make it positive nodes start attract each other :).
-             */
-            gravity: -1.2,
+                /**
+                 * Coulomb's law coefficient. It's used to repel nodes thus should be negative
+                 * if you make it positive nodes start attract each other :).
+                 */
+                gravity: -1.2,
 
-            /**
-             * Theta coefficient from Barnes Hut simulation. Ranged between (0, 1).
-             * The closer it's to 1 the more nodes algorithm will have to go through.
-             * Setting it to one makes Barnes Hut simulation no different from
-             * brute-force forces calculation (each node is considered).
-             */
-            theta: 0.8,
+                /**
+                 * Theta coefficient from Barnes Hut simulation. Ranged between (0, 1).
+                 * The closer it's to 1 the more nodes algorithm will have to go through.
+                 * Setting it to one makes Barnes Hut simulation no different from
+                 * brute-force forces calculation (each node is considered).
+                 */
+                theta: 0.8,
 
-            /**
-             * Drag force coefficient. Used to slow down system, thus should be less than 1.
-             * The closer it is to 0 the less tight system will be.
-             */
-            dragCoeff: 0.02,
+                /**
+                 * Drag force coefficient. Used to slow down system, thus should be less than 1.
+                 * The closer it is to 0 the less tight system will be.
+                 */
+                dragCoeff: 0.02,
 
-            /**
-             * Default time step (dt) for forces integration
-             */
-            timeStep : 20,
-            iterations: 10000,
-            fit: true,
+                /**
+                 * Default time step (dt) for forces integration
+                 */
+                timeStep: 20,
+                iterations: 10000,
+                fit: true,
 
-            /**
-             * Maximum movement of the system which can be considered as stabilized
-             */
-            stableThreshold: 0.000009
-            /*springLength: 100,
-            springCoeff: 0.00008,
-            gravity: -1,
-            theta: 0.001,
-            animate: true,
-            dragCoeff: 0.01,
-            timeStep: 90,
-            stableThreshold: 2,
-            iterations: 10000,
-            refreshInterval: 16, // in ms
-            refreshIterations: 10, // iterations until thread sends an update
-            fit: true*/
-        },
+                /**
+                 * Maximum movement of the system which can be considered as stabilized
+                 */
+                stableThreshold: 0.000009
+                /*springLength: 100,
+                 springCoeff: 0.00008,
+                 gravity: -1,
+                 theta: 0.001,
+                 animate: true,
+                 dragCoeff: 0.01,
+                 timeStep: 90,
+                 stableThreshold: 2,
+                 iterations: 10000,
+                 refreshInterval: 16, // in ms
+                 refreshIterations: 10, // iterations until thread sends an update
+                 fit: true*/
+            },
             iterations: 10000,
             refreshInterval: 16, // in ms
             refreshIterations: 10, // iterations until thread sends an update
@@ -123,8 +123,8 @@ var ngraph = function (cytoscape) {
 
             nodes = nodes.difference(parents);
 
-            nodes = nodes.filterFn(function( ele ){
-                return ele.connectedEdges().length>0
+            nodes = nodes.filterFn(function (ele) {
+                return ele.connectedEdges().length > 0
             });
 
             var edges = eles.edges();
@@ -146,18 +146,20 @@ var ngraph = function (cytoscape) {
 
                  });*/
                 nodes.positions(function (i, node) {
-                    if(!node.data('dragging'))
-                    return L.getNodePosition(node.id())
+                    if (!node.data('dragging'))
+                        return L.getNodePosition(node.id())
                 });
 
-                if(layoutOptions.async){
-                    layout.trigger({type: 'layoutstop', layout: layout});
-                    layout.trigger({type: 'layoutready', layout: layout});
+                if (layoutOptions.async) {
+                    setTimeout(function () {
+                        layout.trigger({type: 'layoutstop', layout: layout});
+                        layout.trigger({type: 'layoutready', layout: layout});
+                    }, 500);
                 }
 
-               /* nodes.forEach(function (node) {
-                    L.getNodePosition(node.id())
-                });*/
+                /* nodes.forEach(function (node) {
+                 L.getNodePosition(node.id())
+                 });*/
 
                 // maybe we fit each iteration
                 if (layoutOptions.fit) {
@@ -177,14 +179,16 @@ var ngraph = function (cytoscape) {
             });
 
             _.each(nodes, function (e, k) {
-                e.on('tapstart',function(e){
-                 e.cyTarget.data('dragging',true)
-                });  e.on('tapend',function(e){
+                e.on('tapstart', function (e) {
+                    e.cyTarget.data('dragging', true)
+                });
+                e.on('tapend', function (e) {
                     e.cyTarget.removeData('dragging');
-                });  e.on('position','node[dragging]',function(e){
-                   if(L.setNodePosition && e.cyTarget.data('dragging')) {
-                       L.setNodePosition(e.cyTarget.data().id);
-                   }
+                });
+                e.on('position', 'node[dragging]', function (e) {
+                    if (L.setNodePosition && e.cyTarget.data('dragging')) {
+                        L.setNodePosition(e.cyTarget.data().id);
+                    }
                 });
                 graph.addNode(e.data().id);
             });
@@ -196,7 +200,7 @@ var ngraph = function (cytoscape) {
                 }
             });
 
-          L = that.l(graph, layoutOptions);
+            L = that.l(graph, layoutOptions);
 
             _.each(nodes, function (e, k) {
                 var data = e.data();
@@ -204,8 +208,8 @@ var ngraph = function (cytoscape) {
                 if (data.pin) {
                     L.pinNode(data.id, true);
                     e.removeData('pin');
-                    e.data('unpin',true);
-                } else if(data.unpin) {
+                    e.data('unpin', true);
+                } else if (data.unpin) {
                     L.pinNode(data.id, false);
                     e.removeData('unpin');
                 }
@@ -216,9 +220,9 @@ var ngraph = function (cytoscape) {
 
             var left = layoutOptions.iterations;
 
-                this.on('layoutstop',function(){
-                    layoutOptions.iterations = 0;
-                });
+            this.on('layoutstop', function () {
+                layoutOptions.iterations = 0;
+            });
 
             L.on('stable', function () {
                 console.log('got Stable event');
@@ -238,11 +242,11 @@ var ngraph = function (cytoscape) {
                 layoutOptions.refreshInterval = 0;
             }
             var updateTimeout;
-            L.on('cycle', function() {
+            L.on('cycle', function () {
                 update();
             });
 
-            if(layoutOptions.async){
+            if (layoutOptions.async) {
                 return this;
             }
 
@@ -254,8 +258,8 @@ var ngraph = function (cytoscape) {
                                 left--;
                                 //update();
                                 updateTimeout = null;
-                                L.step() ?  left =0:false;
-                               // update();
+                                L.step() ? left = 0 : false;
+                                // update();
                                 step();
                                 //step();
                             }, layoutOptions.refreshInterval);
