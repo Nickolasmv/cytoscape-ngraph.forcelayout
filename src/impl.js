@@ -3,10 +3,9 @@
 var Graph = require('ngraph.graph');
 var _ = require('underscore');
 var Q = require('Q');
-//var Nlayout = require('ngraph.forcelayout.v2');
 var Nlayout = require('ngraph.asyncforce');
-var Thread;
 // registers the extension on a cytoscape lib ref
+
 var ngraph = function (cytoscape) {
 
         if (!cytoscape) {
@@ -64,18 +63,6 @@ var ngraph = function (cytoscape) {
                  * Maximum movement of the system which can be considered as stabilized
                  */
                 stableThreshold: 0.000009
-                /*springLength: 100,
-                 springCoeff: 0.00008,
-                 gravity: -1,
-                 theta: 0.001,
-                 animate: true,
-                 dragCoeff: 0.01,
-                 timeStep: 90,
-                 stableThreshold: 2,
-                 iterations: 10000,
-                 refreshInterval: 16, // in ms
-                 refreshIterations: 10, // iterations until thread sends an update
-                 fit: true*/
             },
             iterations: 10000,
             refreshInterval: 16, // in ms
@@ -93,7 +80,6 @@ var ngraph = function (cytoscape) {
                         tgt[k] = obj[k];
                     }
                 }
-
                 return tgt;
             };
 
@@ -226,17 +212,8 @@ var ngraph = function (cytoscape) {
 
             L.on('stable', function () {
                 console.log('got Stable event');
-                left = layoutOptions.iterations;
-            });
-
-
-            var left = layoutOptions.iterations;
-
-            L.on('stable', function () {
-                console.log('got Stable event');
                 left = 0;
             });
-            // for (var i = 0; i < (options.iterations || 500); ++i) {
 
             if (!layoutOptions.animate) {
                 layoutOptions.refreshInterval = 0;
@@ -280,159 +257,11 @@ var ngraph = function (cytoscape) {
 
             };
             step();
-
-            function calcAndSend() {
-                update();
-                /* nodeJsons.forEach(function( nodeJson, j ){
-                 nodeJson.position = L.getNodePosition(node.data.id)
-                 });
-                 broadcast( nodeJsons );*/
-            }
-
-
-            // dicrete/synchronous layouts can just use this helper and all the
-            // busywork is handled for you, including std opts:
-            // - fit
-            // - padding
-            // - animate
-            // - animationDuration
-            // - animationEasing
-            // nodes.layoutPositions( layout, options, getRandomPos );
-
-            return this; // or...
-
-            // continuous/asynchronous layouts need to do things manually:
-            // (this example uses a thread, but you could use a fabric to get even
-            // better performance if your algorithm allows for it)
-
-            /*      var thread = this.thread = cytoscape.thread();
-             thread.require(L);
-
-             // to indicate we've started
-             layout.trigger('layoutstart');
-
-             // for thread updates
-             // var firstUpdate = true;
-             // var id2pos = {};
-             // var updateTimeout;
-
-             // update node positions
-             /!*   var update = function(){
-             nodes.positions(function( i, node ){
-             return id2pos[ node.id() ];
-             });
-
-             // maybe we fit each iteration
-             if( options.fit ){
-             cy.fit( options.padding );
-             }
-
-             if( firstUpdate ){
-             // indicate the initial positions have been set
-             layout.trigger('layoutready');
-             firstUpdate = false;
-             }
-             };*!/
-
-             // update the node positions when notified from the thread but
-             // rate limit it a bit (don't want to overwhelm the main/ui thread)
-             thread.on('message', function( e ){
-             var nodeJsons = e.message;
-             update(nodeJsons);
-             });
-
-             // we want to keep the json sent to threads slim and fast
-             var eleAsJson = function( ele ){
-             return {
-             data: {
-             id: ele.data('id'),
-             source: ele.data('source'),
-             target: ele.data('target'),
-             parent: ele.data('parent')
-             },
-             group: ele.group(),
-             position: ele.position()
-
-             // maybe add calculated data for the layout, like edge length or node mass
-             };
-             };
-
-             // data to pass to thread
-             var pass = {
-             eles: eles.map( eleAsJson ),
-             refreshInterval:  options.refreshInterval
-             // maybe some more options that matter to the calculations here ...
-             };
-
-             // then we calculate for a while to get the final positions
-             thread.pass( pass ).run(function( pass ){;
-             var broadcast = _ref_('broadcast');
-             var nodeJsons = pass.eles.filter(function(e){ return e.group === 'nodes'; });
-
-
-
-             var left = options.iterations ;
-
-             L.on('stable',function(){
-             console.log('got Stable event');
-             left = options.iterations ;
-             });
-             // for (var i = 0; i < (options.iterations || 500); ++i) {
-
-             if (!options.animate) {
-             options.refreshInterval = 0;
-             }
-             var updateTimeout;
-
-
-             var step = function () {
-             if (options.animate) {
-             if (left != 0  /!*condition for stopping layout*!/) {
-             if (!updateTimeout || left == 0) {
-             updateTimeout = setTimeout(function () {
-             left--;
-             L.step(left==0);
-             calcAndSend(  );
-             //update();
-             updateTimeout = null;
-             step();
-             }, options.refreshInterval);
-             }
-             } else {
-             layout.trigger({type: 'layoutstop', layout: layout});
-             layout.trigger({type: 'layoutready', layout: layout});
-             }
-             }else{
-             for (var i = 0; i < left; ++i) {
-             if(i==Math.abs(left/2)){
-             console.log('Half done!');
-             }
-             calcAndSend();
-             L.step(true);
-             }
-             update();
-             }
-             };
-             step();
-
-             function calcAndSend(){
-             nodeJsons.forEach(function( nodeJson, j ){
-             nodeJson.position = L.getNodePosition(node.data.id)
-             });
-             broadcast( nodeJsons );
-             }
-
-
-
-             }).then(function(){
-             // to indicate we've finished
-             layout.trigger('layoutstop');
-             });
-
-             return this; // chaining*/
+            return this;
         };
 
         Layout.prototype.stop = function () {
+            // TODO: thread actions
             // continuous/asynchronous layout may want to set a flag etc to let
             // run() know to stop
 
@@ -448,6 +277,7 @@ var ngraph = function (cytoscape) {
 
         Layout.prototype.destroy = function () {
             // clean up here if you create threads etc
+            // TODO: thread actions
 
             if (this.thread) {
                 this.thread.stop();
@@ -458,11 +288,8 @@ var ngraph = function (cytoscape) {
 
         return Layout;
 
-    }
-    ;
+    };
 
 module.exports = function get(cytoscape) {
-    Thread = cytoscape.Thread;
-
     return ngraph(cytoscape);
 };
