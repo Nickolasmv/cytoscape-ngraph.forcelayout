@@ -25,15 +25,15 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var cytoscape-ngraph.forcelayout = require('cytoscape-ngraph.forcelayout');
+var cyforcelayout = require('cytoscape-ngraph.forcelayout');
 
-cytoscape-ngraph.forcelayout( cytoscape ); // register extension
+cyforcelayout( cytoscape ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-ngraph.forcelayout'], function( cytoscape, cytoscape-ngraph.forcelayout ){
-  cytoscape-ngraph.forcelayout( cytoscape ); // register extension
+require(['cytoscape', 'cytoscape-ngraph.forcelayout'], function( cytoscape, cyforcelayout ){
+  cyforcelayout( cytoscape ); // register extension
 });
 ```
 
@@ -45,7 +45,7 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 Please briefly describe your API here:
 
 ```js
-cy.cytoscape-ngraph.forcelayout({
+cy.cyforcelayout({
     async: {
                  // tell layout that we want to compute all at once:
                  maxIterations: 1000,
