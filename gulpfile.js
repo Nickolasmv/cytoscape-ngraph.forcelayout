@@ -19,11 +19,12 @@ var version;
 
 var browserifyOpts = {
   entries: './src/index.js',
-  debug: true
+  debug: true,
+  standalone: 'cytoscape-ngraph.forcelayout'
 };
 
 var logError = function( err ){
-  notifier.notify({ title: 'cose-bilkent', message: 'Error: ' + err.message });
+  notifier.notify({ title: 'cose-ngraph.forcelayout', message: 'Error: ' + err.message });
   gutil.log( gutil.colors.red('Error in watch:'), gutil.colors.red(err) );
 };
 
