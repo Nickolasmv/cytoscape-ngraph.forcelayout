@@ -7471,6 +7471,10 @@ var ngraph = function (cytoscape) {
 
             var left = layoutOptions.iterations;
 
+            this.on('cyclestop', function (e) {
+                L.off('cycle');
+            });
+
             this.on('layoutstop', function () {
                 layoutOptions.iterations = 0;
             });
@@ -7530,6 +7534,7 @@ var ngraph = function (cytoscape) {
             // continuous/asynchronous layout may want to set a flag etc to let
             // run() know to stop
 
+            this.trigger('cyclestop');
 
             if (this.thread) {
                 this.thread.stop();
