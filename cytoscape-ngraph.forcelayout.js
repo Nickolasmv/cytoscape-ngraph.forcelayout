@@ -7396,7 +7396,7 @@ var ngraph = function (cytoscape) {
                  })
 
                  });*/
-                nodes.positions(function (i, node) {
+                nodes.positions(function (node, i) {
                     if (!node.data('dragging'))
                         return L.getNodePosition(node.id())
                 });
@@ -7431,14 +7431,14 @@ var ngraph = function (cytoscape) {
 
             _.each(nodes, function (e, k) {
                 e.on('tapstart', function (e) {
-                    e.cyTarget.data('dragging', true)
+                    e.target.data('dragging', true)
                 });
                 e.on('tapend', function (e) {
-                    e.cyTarget.removeData('dragging');
+                    e.target.removeData('dragging');
                 });
                 e.on('position', 'node[dragging]', function (e) {
-                    if (L.setNodePosition && e.cyTarget.data('dragging')) {
-                        L.setNodePosition(e.cyTarget.data().id);
+                    if (L.setNodePosition && e.target.data('dragging')) {
+                        L.setNodePosition(e.target.data().id);
                     }
                 });
                 graph.addNode(e.data().id);
@@ -7470,6 +7470,10 @@ var ngraph = function (cytoscape) {
             });
 
             var left = layoutOptions.iterations;
+
+            this.on('cyclestop', function (e) {
+                L.off('cycle');
+            });
 
             this.on('layoutstop', function () {
                 layoutOptions.iterations = 0;
@@ -7530,6 +7534,7 @@ var ngraph = function (cytoscape) {
             // continuous/asynchronous layout may want to set a flag etc to let
             // run() know to stop
 
+            this.trigger('cyclestop');
 
             if (this.thread) {
                 this.thread.stop();
