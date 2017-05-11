@@ -132,6 +132,11 @@ var ngraph = function (cytoscape) {
 
                  });*/
                 nodes.positions(function (i, node) {
+                         if(typeof i != 'number'){
+                             var tmp = i;
+                             i = node;
+                             node = tmp;
+                         }
                     if (!node.data('dragging'))
                         return L.getNodePosition(node.id())
                 });
