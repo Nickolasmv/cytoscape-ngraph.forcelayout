@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-ngraph.forcelayout",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "ngraph.forcelayout",
   "main": "cytoscape-ngraph.forcelayout.js",
   "repository": {

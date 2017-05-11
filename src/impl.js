@@ -231,9 +231,9 @@ var ngraph = function (cytoscape) {
             }
         });
 
-        if (layoutOptions.async) {
-            return this;
-        }
+        // if (layoutOptions.async) {
+        //     return this;
+        // }
 
         var step = function () {
             if (layoutOptions.animate) {
