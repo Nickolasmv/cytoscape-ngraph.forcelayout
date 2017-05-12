@@ -210,6 +210,9 @@ var ngraph = function (cytoscape) {
         });
 
         var left = layoutOptions.iterations;
+        if (layoutOptions.animate && layoutOptions.async.maxIterations) {
+            left =(layoutOptions.async.maxIterations/ layoutOptions.async.stepsPerCycle).toFixed(0);
+        }      
 
         this.on('layoutstop', function () {
             layoutOptions.iterations = 0;
@@ -224,10 +227,14 @@ var ngraph = function (cytoscape) {
             layoutOptions.refreshInterval = 0;
         }
         var updateTimeout;
-        L.on('cycle', function () {
+        L.on('cycle', function (i,stop) {
             update();
-            if (!layoutOptions.animate) {
-                step();
+            if (layoutOptions.animate) {
+                step(stop);
+                return
+            }
+            if(stop){
+                update();
             }
         });
 
@@ -235,23 +242,23 @@ var ngraph = function (cytoscape) {
         //     return this;
         // }
 
-        var step = function () {
+        var step = function (stop) {
             if (layoutOptions.animate) {
-                if (left != 0  /*condition for stopping layout*/) {
+                if (left != 0 || !stop  /*condition for stopping layout*/) {
                     if (!updateTimeout || left == 0) {
-                        updateTimeout = setTimeout(function () {
-                            left--;
-                            //update();
-                            updateTimeout = null;
-                            L.step() ? left = 0 : false;
-                            if (!left) {
-                                update();
-                            }
+                        //   updateTimeout = setTimeout(function () {
+                        left--;
+                        //update();
+                        updateTimeout = null;
+                        var stop = L.step();
+                        stop ? left = 0 : false;
+                        if (!left) {
                             step();
-                            //step();
-                        }, layoutOptions.refreshInterval);
+                        }
+                        //   }, layoutOptions.refreshInterval);
                     }
                 } else {
+                    update();
                     layout.trigger({ type: 'layoutstop', layout: layout });
                     layout.trigger({ type: 'layoutready', layout: layout });
                 }
