@@ -141,12 +141,12 @@ var ngraph = function (cytoscape) {
                     return L.getNodePosition(node.id())
             });
 
-            if (layoutOptions.async) {
-                setTimeout(function () {
-                    layout.trigger({ type: 'layoutstop', layout: layout });
-                    layout.trigger({ type: 'layoutready', layout: layout });
-                }, 500);
-            }
+            // if (layoutOptions.async) {
+            //     setTimeout(function () {
+            //         layout.trigger({ type: 'layoutstop', layout: layout });
+            //         layout.trigger({ type: 'layoutready', layout: layout });
+            //     }, 500);
+            // }
 
             /* nodes.forEach(function (node) {
              L.getNodePosition(node.id())
@@ -227,8 +227,7 @@ var ngraph = function (cytoscape) {
             layoutOptions.refreshInterval = 0;
         }
         var updateTimeout;
-        L.on('cycle', function (i,stop) {
-            update();
+        L.on('cycle', function (i,stop) {            
             if (layoutOptions.animate) {
                 step(stop);
                 return

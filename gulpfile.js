@@ -54,7 +54,7 @@ gulp.task('confver', ['version'], function(){
 
 gulp.task('version', function( next ){
   var now = new Date();
-  version = '1.3.5'//process.env['VERSION'];
+  version = '1.3.6'//process.env['VERSION'];
 
   if( version ){
     done();
@@ -87,13 +87,13 @@ gulp.task('pkgver', ['version'], function(){
 
 gulp.task('push', shell.task([
   'git add -A',
-  'git commit -m "pushing changes for v 1.3.5 release" || echo Nothing to commit',
+  'git commit -m "pushing changes for v 1.3.6 release" || echo Nothing to commit',
   'git push || echo Nothing to push'
 ]));
 
 gulp.task('tag', shell.task([
-  'git tag -a 1.3.5 -m "tagging v1.3.5"',
-  'git push origin 1.3.5'
+  'git tag -a 1.3.6 -m "tagging v1.3.6"',
+  'git push origin 1.3.6'
 ]));
 
 gulp.task('npm', shell.task([
