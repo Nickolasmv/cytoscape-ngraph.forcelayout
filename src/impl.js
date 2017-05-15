@@ -133,9 +133,7 @@ var ngraph = function (cytoscape) {
              });*/
             nodes.positions(function (i, node) {
                 if (typeof i != 'number') {
-                    var tmp = i;
-                    i = node;
-                    node = tmp;
+                    node = i;
                 }
                 if (!node.data('dragging'))
                     return L.getNodePosition(node.id())
@@ -210,9 +208,9 @@ var ngraph = function (cytoscape) {
         });
 
         var left = layoutOptions.iterations;
-        if (layoutOptions.animate && layoutOptions.async.maxIterations) {
-            left =(layoutOptions.async.maxIterations/ layoutOptions.async.stepsPerCycle).toFixed(0);
-        }      
+        if (layoutOptions.async && layoutOptions.async.maxIterations) {
+            left = (layoutOptions.async.maxIterations / layoutOptions.async.stepsPerCycle).toFixed(0);
+        }
 
         this.on('layoutstop', function () {
             layoutOptions.iterations = 0;
@@ -223,18 +221,21 @@ var ngraph = function (cytoscape) {
             left = 0;
         });
 
-        if (!layoutOptions.animate) {
+        if (!layoutOptions.async) {
             layoutOptions.refreshInterval = 0;
         }
         var updateTimeout;
-        L.on('cycle', function (i,stop) {            
+        L.on('cycle', function (i, stop) {
             if (layoutOptions.animate) {
-                step(stop);
-                return
-            }
-            if(stop){
                 update();
             }
+            if (stop) {
+                update();
+                layout.trigger({ type: 'layoutstop', layout: layout });
+                layout.trigger({ type: 'layoutready', layout: layout });
+                return;
+            }
+            step(stop);
         });
 
         // if (layoutOptions.async) {
@@ -242,35 +243,24 @@ var ngraph = function (cytoscape) {
         // }
 
         var step = function (stop) {
-            if (layoutOptions.animate) {
-                if (left != 0 || !stop  /*condition for stopping layout*/) {
-                    if (!updateTimeout || left == 0) {
-                        //   updateTimeout = setTimeout(function () {
-                        left--;
-                        //update();
-                        updateTimeout = null;
-                        var stop = L.step();
-                        stop ? left = 0 : false;
-                        if (!left) {
-                            step();
-                        }
-                        //   }, layoutOptions.refreshInterval);
+            if (left != 0 || !stop  /*condition for stopping layout*/) {
+                if (!updateTimeout || left == 0) {
+                    //   updateTimeout = setTimeout(function () {
+                    left--;
+                    //update();
+                    updateTimeout = null;
+                    var stop = L.step();
+                    stop ? left = 0 : false;
+                    if (!left) {
+                        step();
                     }
-                } else {
-                    update();
-                    layout.trigger({ type: 'layoutstop', layout: layout });
-                    layout.trigger({ type: 'layoutready', layout: layout });
+                    //   }, layoutOptions.refreshInterval);
                 }
             } else {
-
-                for (var i = 0; i < layoutOptions.iterations; i++) {
-                    L.step()
-                }
+                update();
                 layout.trigger({ type: 'layoutstop', layout: layout });
                 layout.trigger({ type: 'layoutready', layout: layout });
-                //update();
             }
-
         };
         step();
         return this;
