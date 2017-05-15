@@ -169,14 +169,14 @@ var ngraph = function (cytoscape) {
 
         _.each(nodes, function (e, k) {
             e.on('tapstart', function (e) {
-                e.cyTarget.data('dragging', true)
+                e.target.data('dragging', true)
             });
             e.on('tapend', function (e) {
-                e.cyTarget.removeData('dragging');
+                e.target.removeData('dragging');
             });
             e.on('position', 'node[dragging]', function (e) {
-                if (L.setNodePosition && e.cyTarget.data('dragging')) {
-                    L.setNodePosition(e.cyTarget.data().id);
+                if (L.setNodePosition && e.target.data('dragging')) {
+                    L.setNodePosition(e.target.data().id);
                 }
             });
             graph.addNode(e.data().id);
