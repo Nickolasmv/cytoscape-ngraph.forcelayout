@@ -88,12 +88,12 @@ gulp.task('pkgver', ['version'], function(){
 gulp.task('push', shell.task([
   'git add -A',
   'git commit -m "pushing changes for v 1.3.9 release" || echo Nothing to commit',
-  'git push || echo Nothing to push'
+  // 'git push || echo Nothing to push'
 ]));
 
 gulp.task('tag', shell.task([
   'git tag -a 1.3.9 -m "tagging v1.3.9"',
-  'git push origin 1.3.9'
+  // 'git push origin 1.3.9'
 ]));
 
 gulp.task('npm', shell.task([
