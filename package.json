@@ -41,7 +41,7 @@
     "ngraph.forcelayout.v2": "0.0.27",
     "ngraph.graph": "0.0.12",
     "ngraph.physics.simulator": "0.0.12",
-    "node-notifier": "^4.4.0",
+    "node-notifier": "^8.0.1",
     "q": "^1.4.1",
     "underscore": "^1.13.6",
     "vinyl-buffer": "^1.0.0",
