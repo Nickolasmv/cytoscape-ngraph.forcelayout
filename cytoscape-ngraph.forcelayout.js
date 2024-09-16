@@ -7361,6 +7361,7 @@ var ngraph = function (cytoscape) {
          options.iterations = options.iterations - Math.abs(options.iterations / 3); // reduce iterations for big graph
          }*/
 
+
         var update = function (nodesJson) {
             /* cy.batch(function () {
              nodesJson.forEach(function(e,k){
@@ -7400,9 +7401,22 @@ var ngraph = function (cytoscape) {
 
         };
 
-        graph.on('changed', function (e) {
-            //  console.dir(e);
-        });
+
+            _.each(nodes, function (e, k) {
+                e.on('tapstart', function (e) {
+                    e.target.data('dragging', true)
+                });
+                e.on('tapend', function (e) {
+                    e.target.removeData('dragging');
+                });
+                e.on('position', 'node[dragging]', function (e) {
+                    if (L.setNodePosition && e.target.data('dragging')) {
+                        L.setNodePosition(e.target.data().id);
+                    }
+                });
+                graph.addNode(e.data().id);
+            });
+
 
         _.each(nodes, function (e, k) {
             e.on('tapstart', function (e) {
@@ -7443,6 +7457,12 @@ var ngraph = function (cytoscape) {
             //  L.setNodePosition(data.id, pos);
             //}
         });
+
+
+            this.on('cyclestop', function (e) {
+                L.off('cycle');
+            });
+
 
         var left = layoutOptions.iterations;
         if (layoutOptions.async && layoutOptions.async.maxIterations) {
@@ -7508,6 +7528,7 @@ var ngraph = function (cytoscape) {
         // continuous/asynchronous layout may want to set a flag etc to let
         // run() know to stop
 
+            this.trigger('cyclestop');
 
         if (this.thread) {
             this.thread.stop();
